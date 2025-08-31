@@ -85,7 +85,7 @@ jar {
 }
 
 application {
-    mainClassName = 'de.pribluda.eth.tanktruck'
+    mainClassName = 'de.pribluda.eth.tanktruck.Truck'
 }
 
 test {

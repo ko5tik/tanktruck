@@ -24,7 +24,7 @@ tanktruck:
   checkInterval: 100000
   # list of addresses to refuel, comma separated
   addressList: "0x6661eac1901cf486d5A6D820f338c7C6668217A8,0x0470840ec5cdEB70B97f5c13C294e91463428B47"
-  # refuel when it reaches thos threshold - 10K
+  # refuel when it reaches this threshold - 10K
   minAmount: 10000000000000000000000
-  # refuel to this value 100K
+  # send 100K
   sendAmount: 100000000000000000000000
