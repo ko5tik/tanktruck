@@ -1,0 +1,16 @@
+logging:
+  level:
+    root: error
+    org:
+      web3j:
+        protocol: warn
+    de:
+      pribluda:
+        eth:
+          tanktruck: info
+
+
+tanktruck:
+  #  supply executor primary key via the outside parameter.
+  executor: ""
+
