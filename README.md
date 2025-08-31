@@ -1,3 +1,13 @@
+##  Purpose
+
+Tanktruck refuels your ethereum account when needed. If you are running some blockchain operation  
+and require periodic automated maintenance, you can use Tanktruck to keep technical runners funded. 
+
+## Support
+
+If you need support, of maintenance bots, or smart contracts developed—ask me.  If you like to thank me, 
+send your thanks to: 0x853CE673EeE6e9FF5EE8144eF291ab31604e6D35
+
 
 ## docker image
 
