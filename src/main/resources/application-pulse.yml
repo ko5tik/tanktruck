@@ -18,7 +18,7 @@ logging:
 
 
 tanktruck:
-  #  supply executor primary key via the outside parameter, no do not wrrite it here. Nexev
+  # supply executor primary key via the outside parameter, no do not write it here. Never!
   executorKey: "do not place real keys here. pass via parameter of whatever you use."
   # check every 100 seconds
   checkInterval: 100000

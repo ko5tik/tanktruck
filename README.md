@@ -29,6 +29,12 @@ Add production config after you build the image
     scp tanktruck.tar.gz  root@37.27.2.146:.
 ````
 
+Ship to new server:
+````shell
+    docker save -o tanktruck.tar tanktruck
+    gzip -f tanktruck.tar
+    scp tanktruck.tar.gz  root@135.181.1.93:.
+````
 
 
 ### run
