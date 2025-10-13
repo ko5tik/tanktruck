@@ -24,13 +24,17 @@ contract Tanker is Ownable2Step {
     address public attendant;
 
 
+    function drain(address _destination, uint256 _amount) external onlyOwner {
+        payable(_destination).transfer(_amount);
+    }
+
     function addClient(address _client, uint256 _low, uint256 _hi) external onlyOwner {
         clients.push(Client(_client, _low, _hi));
     }
 
     function removeClient(uint256 pos) external onlyOwner {
         require(pos < clients.length, "Tanktruck: out of  bounds");
-        clients[pos] = clients[clients.length-1];
+        clients[pos] = clients[clients.length - 1];
         clients.pop();
     }
 
@@ -39,12 +43,26 @@ contract Tanker is Ownable2Step {
     }
 
     constructor(address _owner)  Ownable(_owner){
-
     }
 
+
+    function resupply() external attendantOnly {
+        for (uint256 i = 0; i < clients.length; i++) {
+            Client  memory c = clients[i];
+            uint256 balance = c.client.balance;
+            if (balance < c.low) {
+                uint256 toSend = c.high - balance;
+                require(address(this).balance >= toSend, "Tanktruck: out of gas");
+                payable(c.client).transfer(toSend);
+            }
+        }
+    }
 
     modifier attendantOnly() {
         require(_msgSender() == attendant, "Tanktruck: attendant only");
         _;
+    }
+
+    receive() external payable {
     }
 }
