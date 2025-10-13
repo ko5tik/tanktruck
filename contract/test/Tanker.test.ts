@@ -14,10 +14,71 @@ describe("Tanker", () => {
     }
 
 
-    it("Should deploy", async () => {
-        const [owner] = await ethers.getSigners();
-        let {tanker} = await networkHelpers.loadFixture(deployContracts);
+    describe('deploymern', () => {
+        it("Should deploy", async () => {
+            const [owner] = await ethers.getSigners();
+            let {tanker} = await networkHelpers.loadFixture(deployContracts);
 
-        expect(await tanker.owner()).to.equal(owner.address);
+            expect(await tanker.owner()).to.equal(owner.address);
+        })
+    })
+
+
+    describe('security', () => {
+        it("only owner methods", async () => {
+            const [owner, nonOwner] = await ethers.getSigners();
+            let {tanker} = await networkHelpers.loadFixture(deployContracts);
+            await expect(tanker.connect(nonOwner).setAttendant(nonOwner)).to.be.revertedWithCustomError(tanker, "OwnableUnauthorizedAccount");
+            await expect(tanker.connect(nonOwner).addClient(nonOwner, 100n, 1000n)).to.be.revertedWithCustomError(tanker, "OwnableUnauthorizedAccount");
+            await expect(tanker.connect(nonOwner).removeClient(0)).to.be.revertedWithCustomError(tanker, "OwnableUnauthorizedAccount");
+
+        })
+    })
+
+    //  configuration settings
+    describe('configuration', () => {
+        // shall be able to set the new attendant
+        it("Should set attendant", async () => {
+            const [owner, nonOwner] = await ethers.getSigners();
+            let {tanker} = await networkHelpers.loadFixture(deployContracts);
+
+            await expect(tanker.setAttendant(nonOwner)).to.not.be.revert(ethers);
+
+            expect(await tanker.attendant()).to.equal(nonOwner.address);
+        })
+
+
+        it('shall add new client', async () => {
+            const [owner, client] = await ethers.getSigners();
+            let {tanker} = await networkHelpers.loadFixture(deployContracts);
+
+            await expect(tanker.addClient(client, 100n, 1000n)).to.not.be.revert(ethers);
+
+            let [adr, lo, hi] = await tanker.clients(0);
+            expect(adr).to.equal(client.address);
+            expect(lo).to.equal(100n);
+            expect(hi).to.equal(1000n);
+        })
+
+        it('shall remove client by number', async () => {
+            const [owner, first, second] = await ethers.getSigners();
+            let {tanker} = await networkHelpers.loadFixture(deployContracts);
+
+            await expect(tanker.addClient(first, 100n, 1000n)).to.not.be.revert(ethers);
+            await expect(tanker.addClient(second, 123n, 456n)).to.not.be.revert(ethers);
+
+            await expect(tanker.removeClient(2)).to.be.revertedWith("Tanktruck: out of  bounds");
+            await expect(tanker.removeClient(0)).to.not.be.revert(ethers);
+
+            let [adr, lo, hi] = await tanker.clients(0);
+            expect(adr).to.equal(second.address);
+            expect(lo).to.equal(123n);
+            expect(hi).to.equal(456n);
+        })
+    })
+
+
+    //  operations
+    describe('operations', () => {
     })
 })
