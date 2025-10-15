@@ -7,69 +7,50 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
+import org.web3j.generated.contracts.ITanker;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthGetBalance;
-import org.web3j.utils.Numeric;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
+import org.web3j.tx.gas.DefaultGasProvider;
 
+/**
+ *  Hose - called periodically to determine whether refueling is necessary
+ */
 @Service
 public class Hose {
 
-    private final Credentials credentials;
     Logger logger = LoggerFactory.getLogger(Hose.class);
 
-    private final List<String> addresses;
-    private final BigInteger minValue;
-    private final BigInteger sendValue;
+
     private final Web3j web3j;
     private final EtherSender sender;
+    private DefaultGasProvider defaultGasProvider;
+    private final ITanker tanker;
 
-    public Hose(@Value("${tanktruck.addressList}") List<String> addresses,
-                @Value("${tanktruck.minAmount}") BigInteger minValue,
-                @Value("${tanktruck.sendAmount}") BigInteger sendValue,
+    public Hose(@Value("${tanktruck.contract}") String tankerContract,
                 Web3j web3j,
                 Credentials credentials,
                 EtherSender sender) {
-        this.addresses = addresses;
-        this.minValue = minValue;
-        this.sendValue = sendValue;
-        this.web3j = web3j;
-        this.credentials = credentials;
 
+
+        this.web3j = web3j;
         this.sender = sender;
+        defaultGasProvider = new DefaultGasProvider();
+        this.tanker = ITanker.load(tankerContract, web3j, credentials, defaultGasProvider);
     }
 
     @Scheduled(fixedRateString = "${tanktruck.checkInterval}")
     public void pump() {
-        logger.info("scheduled status check");
+        logger.info("scheduled status check....");
 
-        for (String address : addresses) {
-            logger.info("checking status of {}", address);
-            balanceCheck(address);
-        }
-    }
-
-    private boolean balanceCheck(String address) {
-
+        // do we need to send?
         try {
-            EthGetBalance ethGetBalance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send();
-            String result = ethGetBalance.getResult();
-            logger.info("balance of {} is {}", address, result);
-
-            BigInteger balanceAmount = Numeric.decodeQuantity(result);
-            if (balanceAmount.compareTo(minValue) < 0) {
-                logger.info("filling  {}  up", address);
-
-                sender.sendFunds(address, sendValue);
-                return true;
+            Boolean needsResupply = tanker.needResupply().send();
+            if (needsResupply) {
+                sender.sendFunds();
             }
-        } catch (IOException e) {
-            logger.error("failed to poll block receipts: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("failed to check tanker status: {}", e.getMessage());
         }
-        return false;
+        logger.info("... done");
     }
 }
