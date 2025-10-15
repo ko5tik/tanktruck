@@ -1,7 +1,7 @@
 
 web3j:
   node:
-    url: https://rpc.pulsechain.com   # wss://rpc.pulsechain.com
+    url: https://rpc.pulsechain.com
     chainId: 369
     pollingInterval: 100
 
@@ -18,13 +18,12 @@ logging:
 
 
 tanktruck:
-  #  supply executor primary key via the outside parameter, no do not wrrite it here. Nexev
-  executorKey: "do not place real keys here. pass via parameter of whatever you use."
-  # check every 100 seconds
-  checkInterval: 100000
-  # list of addresses to refuel, comma separated
-  addressList: "0x6661eac1901cf486d5A6D820f338c7C6668217A8,0x0470840ec5cdEB70B97f5c13C294e91463428B47"
-  # refuel when it reaches this threshold - 10K
-  minAmount: 10000000000000000000000
-  # send 100K
-  sendAmount: 100000000000000000000000
+  # contract address
+  contract: '0xc3995B7D1Fd836e578B6F116b50B68f42B1975b8'
+  # this shall be a low-value technical key for the address performing the contract execution.
+  # supply executor primary key via the outside parameter, no do not write it here. Never!
+  executorKey: "do not place real keys here. pass via parameter of whatever mechamism you use."
+  # check every 120 seconds
+  checkInterval: 120000
+  # bribe above block base fee, %
+  bribe: 5
