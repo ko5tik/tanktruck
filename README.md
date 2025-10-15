@@ -31,6 +31,12 @@ Ship to server:
     scp tanktruck.tar.gz  root@135.181.1.93:.
 ````
 
+Ship to new server:
+````shell
+    docker save -o tanktruck.tar tanktruck
+    gzip -f tanktruck.tar
+    scp tanktruck.tar.gz  root@135.181.1.93:.
+````
 
 ### run
 
