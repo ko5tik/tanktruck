@@ -43,6 +43,11 @@ Ship to new server:
 ````shell
 sudo docker run -d -it tanktruck --tanktruck.executorKey=xxxxx-your-private-key-here  --spring.profiles.active=pulse
 ````
+Interesting configuratio parameters:
+    - tanktruck.executorKey - private key of the bot that will be used to execute contract.  This address shall be resistered as _attendant_ on the constract. Bot can also supply this address with gas.   
+    - tanktruck.contract - address of deployed contract part.  
+    - tanktruck.checkINterwal - interval between checks.  Default 120 seconds. 
+    - tanktruck.bribe - % over basic gas price
 
 
 ## Contract instance
