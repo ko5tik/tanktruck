@@ -20,7 +20,6 @@ import java.util.function.Function;
 
 /**
  * stripped down tx pool content. no need to parse what we do not need
- *
  */
 public final class TxPoolGas extends Response<TxPoolGas.TxPoolContentGasResult> {
     public static class TxPoolContentGasResult {

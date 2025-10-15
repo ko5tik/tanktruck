@@ -45,7 +45,20 @@ contract Tanker is Ownable2Step {
     constructor(address _owner)  Ownable(_owner){
     }
 
+    // whether somebody needs to be resupplied
+    function needResupply() public view returns (bool) {
 
+        for (uint256 i = 0; i < clients.length; i++) {
+            Client  memory c = clients[i];
+            uint256 balance = c.client.balance;
+            if (balance < c.low) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // perform resupply
     function resupply() external attendantOnly {
         for (uint256 i = 0; i < clients.length; i++) {
             Client  memory c = clients[i];

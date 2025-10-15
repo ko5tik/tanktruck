@@ -6,6 +6,12 @@ import org.web3j.protocol.core.Request;
 import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 
+/**
+ * extended admin interface,
+ *
+ * as we need only a certain subset of admin data, we have just scaled down version of the original
+ * objects.  we are only interested to see transaction gas fees to be able to replace it.
+ */
 public class ExtendedAdmin extends org.web3j.protocol.admin.JsonRpc2_0Admin{
     public ExtendedAdmin(Web3jService web3jService) {
         super(web3jService);

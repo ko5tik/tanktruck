@@ -31,7 +31,7 @@ describe("Tanker", () => {
             await expect(tanker.connect(nonOwner).setAttendant(nonOwner)).to.be.revertedWithCustomError(tanker, "OwnableUnauthorizedAccount");
             await expect(tanker.connect(nonOwner).addClient(nonOwner, 100n, 1000n)).to.be.revertedWithCustomError(tanker, "OwnableUnauthorizedAccount");
             await expect(tanker.connect(nonOwner).removeClient(0)).to.be.revertedWithCustomError(tanker, "OwnableUnauthorizedAccount");
-            await expect(tanker.connect(nonOwner).drain(nonOwner,  0)).to.be.revertedWithCustomError(tanker, "OwnableUnauthorizedAccount");
+            await expect(tanker.connect(nonOwner).drain(nonOwner, 0)).to.be.revertedWithCustomError(tanker, "OwnableUnauthorizedAccount");
 
         })
 
@@ -88,6 +88,36 @@ describe("Tanker", () => {
     //  operations
     describe('operations', () => {
 
+        it('shall calculate need to resupply', async () => {
+
+            const [owner] = await ethers.getSigners();
+            let {tanker} = await networkHelpers.loadFixture(deployContracts);
+
+            expect(await tanker.needResupply()).to.equal(false);
+
+            //  3 addresses
+            let first = ethers.Wallet.createRandom();
+            let second = ethers.Wallet.createRandom();
+            let third = ethers.Wallet.createRandom();
+
+
+            // if there are some dry addresses,  they need tobe resupplied
+            await expect(tanker.addClient(first, 100n, 12345n)).to.not.be.revert(ethers);
+            await expect(tanker.addClient(second, 500n, 45645454n)).to.not.be.revert(ethers);
+            await expect(tanker.addClient(third, 123n, 34567n)).to.not.be.revert(ethers);
+
+            expect(await tanker.needResupply()).to.equal(true);
+
+            //  all of them have enough.  no need to resupply
+            await owner.sendTransaction({to: first, value: 100});
+            await owner.sendTransaction({to: second, value: 500});
+            await owner.sendTransaction({to: third, value: 123});
+
+            expect(await tanker.needResupply()).to.equal(false);
+
+        })
+
+
         it('shall resupply clients', async () => {
             const [owner] = await ethers.getSigners();
             let {tanker} = await networkHelpers.loadFixture(deployContracts);
@@ -99,7 +129,6 @@ describe("Tanker", () => {
             let second = ethers.Wallet.createRandom();
             let third = ethers.Wallet.createRandom();
 
-            console.log("balance: ", await ethers.provider.getBalance(first));
 
             //  supply tanker with gas
 
@@ -115,7 +144,7 @@ describe("Tanker", () => {
             await expect(tanker.addClient(third, 123n, 34567n)).to.not.be.revert(ethers);
 
             //  resupply everybody,  this shall revert
-            await expect(tanker.resupply()).to.be.revertedWith( "Tanktruck: out of gas");
+            await expect(tanker.resupply()).to.be.revertedWith("Tanktruck: out of gas");
 
             // gove some value to tanker
             await owner.sendTransaction({

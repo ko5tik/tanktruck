@@ -42,3 +42,15 @@ Ship to new server:
 ````shell
 sudo docker run -d -it tanktruck --tanktruck.executorKey=xxxxx-your-private-key-here  --spring.profiles.active=pulse
 ````
+
+
+## Contract instance
+
+Contract:  0xc3995B7D1Fd836e578B6F116b50B68f42B1975b8
+GUI: https://scgui.xyz/Tanktruck-F7Y48vE7J7
+
+### Set up contracts
+
+- Register the attendant address. This address will be allowed to run the resupply method.  Private key of this address shall be supplied as credential to runner bot
+- Register addresses to be supplied with gas.   Attendant address can be suplied but this bot too!
+- Send gas money to the contract address.  This amount will be distributed between registered addresses.
