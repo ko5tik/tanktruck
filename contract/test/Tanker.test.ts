@@ -67,6 +67,26 @@ describe("Tanker", () => {
             expect(hi).to.equal(1000n);
         })
 
+
+
+        it('shall bulk add new client', async () => {
+            const [owner, client, anotherCLient] = await ethers.getSigners();
+            let {tanker} = await networkHelpers.loadFixture(deployContracts);
+
+            await expect(tanker.bulkAddClient([client, anotherCLient], 100n, 1000n)).to.not.be.revert(ethers);
+
+            let [adr, lo, hi] = await tanker.clients(0);
+            expect(adr).to.equal(client.address);
+            expect(lo).to.equal(100n);
+            expect(hi).to.equal(1000n);
+
+            [adr, lo, hi] = await tanker.clients(1);
+            expect(adr).to.equal(anotherCLient.address);
+            expect(lo).to.equal(100n);
+            expect(hi).to.equal(1000n);
+        })
+
+
         it('shall remove client by number', async () => {
             const [owner, first, second] = await ethers.getSigners();
             let {tanker} = await networkHelpers.loadFixture(deployContracts);

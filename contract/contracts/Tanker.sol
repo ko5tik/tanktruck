@@ -18,8 +18,8 @@ contract Tanker is Ownable2Step {
 
     Client[]  public clients;
 
-    // attendant initшting refueling. as this address primary is potentially exposed
-    // from the conainer, only low value keys shall be used here.  do not keep more than required balnqce
+    // attendant initiating refueling. as this address is potentially exposed
+    // from the container, only low value keys shall be used here.  do not keep more than required balance
     // gas money on it!
     address public attendant;
 
@@ -28,7 +28,23 @@ contract Tanker is Ownable2Step {
         payable(_destination).transfer(_amount);
     }
 
+    /**
+     * bulk client addition
+     */
+    function bulkAddClient(address[] calldata _clients, uint256 _low, uint256 _hi) external onlyOwner {
+        uint256 l = _clients.length;
+        for (uint256 i; i < l;) {
+            _addClientInternal(_clients[i],_low,_hi);
+            unchecked {++i;}
+        }
+    }
+
     function addClient(address _client, uint256 _low, uint256 _hi) external onlyOwner {
+        _addClientInternal(_client,_low,_hi);
+    }
+
+
+    function _addClientInternal(address _client, uint256 _low, uint256 _hi) private {
         clients.push(Client(_client, _low, _hi));
     }
 
