@@ -196,12 +196,18 @@ func (m *Bowser) Execute() error {
 		return err
 	}
 
-	// Apply safety margin -  50%
+	// Apply safety margin - 50%
 	gasLimit = gasLimit + (gasLimit / 2)
 	auth.GasLimit = gasLimit
 
-	//  TODO: send legacy transaction, needs improvement -  will be done under the hood
-	tx := types.NewTransaction(nonce, m.contractAddress, auth.Value, auth.GasLimit, auth.GasPrice, data)
+	tx := types.NewTx(&types.LegacyTx{
+		Nonce:    nonce,
+		To:       &m.contractAddress,
+		Value:    auth.Value,
+		Gas:      auth.GasLimit,
+		GasPrice: auth.GasPrice,
+		Data:     data,
+	})
 
 	signedTx, err := auth.Signer(auth.From, tx)
 	if err != nil {

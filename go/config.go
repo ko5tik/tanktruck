@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 type Config struct {
