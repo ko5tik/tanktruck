@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN go mod download
 COPY ./ ./
 
 # Build the bot
-RUN go build -o xusdbot ./bot/
+RUN go build -o tankrtuck ./
 
 # Final stage
 FROM alpine:latest
@@ -24,10 +24,10 @@ RUN apk add --no-cache ca-certificates
 WORKDIR /root/
 
 # Copy the binary from the builder
-COPY --from=builder /app/xusdbot .
+COPY --from=builder /app/tanktruck .
 # Copy the default config
 COPY ./cfg/ ./cfg/
 
 # Run the bot
-ENTRYPOINT ["./xusdbot"]
+ENTRYPOINT ["./tanktruck"]
 

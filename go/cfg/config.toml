@@ -2,6 +2,7 @@
 [web3j]
 url = "https://rpc.pulsechain.com"
 chainId = 369
+# any valid random key will do
 readerKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
 
@@ -13,4 +14,4 @@ executor = ""
 #  gas premium above base price
 bribe = 10
 #  cron specification
-pollingInterval = "* * * * *"
+pollingInterval = "*/2 * * * *"

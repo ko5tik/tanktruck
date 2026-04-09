@@ -1,4 +1,4 @@
-module net.xusd/maintenance
+module de.pribluda/tanktruck
 
 go 1.25.7
 
