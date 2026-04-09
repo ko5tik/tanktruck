@@ -5,26 +5,19 @@ and require periodic automated maintenance, you can use Tanktruck to keep techni
 
 ## Support
 
-If you need support, of maintenance bots, or smart contracts developed—ask me.  If you like to thank me, 
+If you need support, of maintenance bots, or smart contracts developed, ask me.  If you like to thank me, 
 send your thanks to: 0x853CE673EeE6e9FF5EE8144eF291ab31604e6D35
 
 
-## docker image
+## Docker image
 
-### build
+ See the readme file in the go subdirectory.
 
-````shell
-./gradlew bootBuildImage --imageName=tanktruck
-````
-You should not store real production keys in the docker image or repository.
-Add production config after you build the image
-
-
-
-### download and ship
+### download and Ship
 
 
 Ship to server:
+
 ````shell
     docker save -o tanktruck.tar tanktruck
     gzip -f tanktruck.tar
@@ -32,27 +25,17 @@ Ship to server:
 ````
 
 
-
-### run
-
-````shell
-sudo docker run -d -it tanktruck --tanktruck.executorKey=xxxxx-your-private-key-here  --spring.profiles.active=pulse
-````
-
-Interesting configuratio parameters:
-    - tanktruck.executorKey - private key of the bot that will be used to execute contract.  This address shall be resistered as _attendant_ on the constract. Bot can also supply this address with gas.   
-    - tanktruck.contract - address of deployed contract part.  
-    - tanktruck.checkINterwal - interval between checks.  Default 120 seconds. 
-    - tanktruck.bribe - % over basic gas price
-
-
 ## Contract instance
 
-Contract:  0xc3995B7D1Fd836e578B6F116b50B68f42B1975b8
-GUI: https://scgui.xyz/Tanktruck-F7Y48vE7J7
+After you have deployed smart contract in a chain of your choice, set up GUI for easier configuration:
+
+https://scgui.xyz/
+
+You will need ABI and deployed contract address. 
 
 ### Set up contracts
 
-- Register the attendant address. This address will be allowed to run the resupply method.  Private key of this address shall be supplied as credential to runner bot
-- Register addresses to be supplied with gas.   Attendant address can be suplied but this bot too!
-- Send gas money to the contract address.  This amount will be distributed between registered addresses.
+- Register the attendant address. This address will be allowed to run the resupply method.  Private key of this address shall be supplied as a credential to runner bot
+- Register addresses to be supplied with gas. Attendant address can be suplied but this bot too!
+- bulk address registration is available.
+- Send gas money to the contract address. This amount will be distributed between registered addresses.

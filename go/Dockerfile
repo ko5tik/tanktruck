@@ -14,7 +14,7 @@ RUN go mod download
 COPY ./ ./
 
 # Build the bot
-RUN go build -o tankrtuck ./
+RUN go build -o tanktruck ./
 
 # Final stage
 FROM alpine:latest
