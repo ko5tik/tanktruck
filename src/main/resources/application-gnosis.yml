@@ -1,0 +1,28 @@
+
+web3j:
+  node:
+    url: https://rpc.gnosischain.com
+    chainId: 100
+    pollingInterval: 100
+
+logging:
+  level:
+    root: error
+    org:
+      web3j:
+        protocol: warn
+    de:
+      pribluda:
+        eth:
+          tanktruck: info
+
+tanktruck:
+  # contract address
+  contract: '0xf3eA81e97080b47Ea8E76394B6019962c4899484'
+  # this shall be a low-value technical key for the address performing the contract execution.
+  # supply executor primary key via the outside parameter, no do not write it here. Never!
+  executorKey: "do not place real keys here. pass via parameter of whatever mechamism you use."
+  # check every 120 seconds
+  checkInterval: 120000
+  # bribe above block base fee, %
+  bribe: 5
