@@ -113,6 +113,12 @@ func (m *Bowser) Start() {
 }
 
 func (m *Bowser) Execute() error {
+	// Check and cancel any stuck transactions before proceeding
+	err := m.CancelStuckTransaction()
+	if err != nil {
+		log.Printf("Error during stuck transaction check/cancellation: %v", err)
+	}
+
 	log.Println("Checking if resupply is needed...")
 
 	var needsResupply bool
@@ -186,8 +192,12 @@ func (m *Bowser) Execute() error {
 		jsonErr, ok := err.(JsonError)
 
 		if ok {
-			decodeString, _ := hex.DecodeString(jsonErr.ErrorData().(string))
-			log.Printf("json error: %s, data: %s  %s", jsonErr.Error(), jsonErr.ErrorData(), decodeString)
+			var decodeString []byte
+			if dataStr, isStr := jsonErr.ErrorData().(string); isStr {
+				dataStr = strings.TrimPrefix(dataStr, "0x")
+				decodeString, _ = hex.DecodeString(dataStr)
+			}
+			log.Printf("json error: %s, data: %v  %s", jsonErr.Error(), jsonErr.ErrorData(), decodeString)
 		} else {
 			log.Printf("non-json error: %s", err)
 		}
@@ -234,6 +244,82 @@ func (m *Bowser) Execute() error {
 		log.Printf("Transaction successful: %s", signedTx.Hash().Hex())
 	} else {
 		log.Printf("Transaction failed: %s status: %v", signedTx.Hash().Hex(), receipt.Status)
+	}
+
+	return nil
+}
+
+func (m *Bowser) CancelStuckTransaction() error {
+	log.Println("Checking for stuck transactions...")
+	ctx := context.Background()
+
+	pendingNonce, err := m.client.PendingNonceAt(ctx, m.fromAddress)
+	if err != nil {
+		return fmt.Errorf("failed to get pending nonce: %w", err)
+	}
+
+	nonce, err := m.client.NonceAt(ctx, m.fromAddress, nil)
+	if err != nil {
+		return fmt.Errorf("failed to get confirmed nonce: %w", err)
+	}
+
+	if pendingNonce > nonce {
+		log.Printf("Found stuck transaction(s). Confirmed nonce: %d, Pending nonce: %d. Cancelling transaction %d...", nonce, pendingNonce, nonce)
+
+		gasPrice, err := m.client.SuggestGasPrice(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to suggest gas price: %w", err)
+		}
+
+		// Apply a significant boost to ensure cancellation (150% + bribe)
+		bribeMultiplier := big.NewInt(int64(150 + m.config.Maintainer.Bribe))
+		gasPrice = new(big.Int).Div(new(big.Int).Mul(gasPrice, bribeMultiplier), big.NewInt(100))
+
+		chainID := big.NewInt(int64(m.config.Web3j.ChainID))
+
+		auth, err := bind.NewKeyedTransactorWithChainID(m.privateKey, chainID)
+		if err != nil {
+			return fmt.Errorf("error creating transactor: %w", err)
+		}
+		auth.Nonce = big.NewInt(int64(nonce))
+		auth.Value = big.NewInt(0)
+		auth.GasLimit = 21000 // standard gas limit for a simple ETH transfer
+		auth.GasPrice = gasPrice
+
+		tx := types.NewTx(&types.LegacyTx{
+			Nonce:    nonce,
+			To:       &m.fromAddress,
+			Value:    auth.Value,
+			Gas:      auth.GasLimit,
+			GasPrice: auth.GasPrice,
+			Data:     nil,
+		})
+
+		signedTx, err := auth.Signer(auth.From, tx)
+		if err != nil {
+			return fmt.Errorf("error signing cancellation transaction: %w", err)
+		}
+
+		err = m.client.SendTransaction(ctx, signedTx)
+		if err != nil {
+			return fmt.Errorf("error sending cancellation transaction: %w", err)
+		}
+
+		log.Printf("Cancellation transaction sent: %s", signedTx.Hash().Hex())
+
+		// Wait for receipt
+		receipt, err := bind.WaitMined(ctx, m.client, signedTx)
+		if err != nil {
+			return fmt.Errorf("error waiting for cancellation transaction mining: %w", err)
+		}
+
+		if receipt.Status == types.ReceiptStatusSuccessful {
+			log.Printf("Cancellation transaction successful: %s", signedTx.Hash().Hex())
+		} else {
+			log.Printf("Cancellation transaction failed: %s status: %v", signedTx.Hash().Hex(), receipt.Status)
+		}
+	} else {
+		log.Println("No stuck transactions found.")
 	}
 
 	return nil
